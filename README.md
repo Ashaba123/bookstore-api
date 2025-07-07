@@ -11,6 +11,7 @@ The Bookstore API is a Node.js-based RESTful API for managing a bookstore's user
 - **Security**: JWT-based authentication, rate limiting, and secure password storage.
 - **Logging**: Comprehensive logging with Winston for debugging and monitoring.
 - **Testing**: Automated tests with Jest and Supertest to ensure reliability.
+- **Deployment**:Render.
 
 ## Prerequisites
 - **Node.js**: Version 14.18.0 or higher.
