@@ -1,0 +1,31 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+logs/
+
+# Test coverage reports
+coverage/
+
+# Build artifacts
+dist/
+build/
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
