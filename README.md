@@ -1,9 +1,11 @@
 # Bookstore API
 
 ## Overview
+
 The Bookstore API is a Node.js-based RESTful API for managing a bookstore's users, books, orders, and reviews. It uses Express.js for routing, PostgreSQL for data storage, and includes features like user authentication with JWT, password hashing with bcrypt, rate limiting, and logging with Winston. The API is tested using Jest and Supertest.
 
 ## Features
+
 - **User Management**: Register and login users with secure password hashing.
 - **Book Management**: CRUD operations for books (create, read, update, delete).
 - **Order Management**: Create and retrieve orders for authenticated users.
@@ -14,22 +16,30 @@ The Bookstore API is a Node.js-based RESTful API for managing a bookstore's user
 - **Deployment**:Render.
 
 ## Prerequisites
+
 - **Node.js**: Version 14.18.0 or higher.
 - **PostgreSQL**: A running PostgreSQL database.
 - **npm**: Package manager for installing dependencies.
 
 ## Installation
+
 1. **Clone the Repository**:
+
    ```bash
    git clone <repository-url>
    cd bookstore-api
    ```
+
 2. **Install Dependencies**:
+
    ```bash
    npm install
    ```
+
 3. **Configure Environment Variables**:
+
    Create a `.env` file in the root directory with the following variables:
+
    ```env
    DB_USER=your_db_user
    DB_PASSWORD=your_db_password
@@ -40,9 +50,13 @@ The Bookstore API is a Node.js-based RESTful API for managing a bookstore's user
    NODE_ENV=development
    PORT=3000
    ```
+
 4. **Set Up the Database**:
+
    Ensure your PostgreSQL database is running and has the following tables:
+
    ```sql
+
    CREATE TABLE users (
      id SERIAL PRIMARY KEY,
      username VARCHAR(255) UNIQUE NOT NULL,
@@ -70,19 +84,26 @@ The Bookstore API is a Node.js-based RESTful API for managing a bookstore's user
    ```
 
 ## Running the API
+
 Start the server with:
+
 ```bash
+
 npm start
+
 ```
+
 The API will run on `http://localhost:3000` by default.
 
 ## API Endpoints
 
 ### Authentication
+
 - `POST /signup` — Register a new user. `{ username, password }`
 - `POST /login` — Login and receive a JWT. `{ username, password }`
 
 ### Books
+
 - `GET /books` — List all books.
 - `GET /books/:id` — Get a book by ID.
 - `POST /books` — Create a new book. (Requires JWT)
@@ -90,42 +111,54 @@ The API will run on `http://localhost:3000` by default.
 - `DELETE /books/:id` — Delete a book. (Requires JWT)
 
 ### Orders
+
 - `POST /orders` — Create an order. (Requires JWT)
 - `GET /orders` — List orders for authenticated user. (Requires JWT)
 
 ### Reviews
+
 - `POST /reviews` — Add a review for a book. (Requires JWT)
 - `GET /reviews/:book_id` — List reviews for a book.
 
 ### Misc
+
 - `GET /` — Welcome message.
 
 ## Security & Middleware
+
 - **JWT Authentication**: Protects sensitive endpoints.
 - **Rate Limiting**: Prevents abuse (100 requests per 15 minutes).
 - **Password Hashing**: Uses bcryptjs for secure password storage.
 - **Logging**: Uses Winston for request and error logging.
 
 ## Testing
-Run tests with:
-```bash
-npm test
-```
-Tests are located in the `tests/` directory and use Jest and Supertest to cover authentication, books, orders, and reviews endpoints.
+
+- The `users-service` includes automated tests using Jest and Supertest. To run tests for the users-service:
+
+  ```bash
+  cd users-service
+  npm test
+  ```
+
+- Tests are located in the `users-service/tests/` directory and cover authentication and user management endpoints.
+- Other services can be similarly configured for testing by adding Jest and Supertest to their dependencies.
 
 ## Dependencies
-- express
-- pg
-- jsonwebtoken
-- bcryptjs
-- dotenv
-- winston
-- express-rate-limit
-- jest (dev)
-- supertest (dev)
+
+Each service manages its own dependencies in its respective `package.json` file. For example:
+
+- `users-service`:
+  - express
+  - pg
+  - jsonwebtoken
+  - bcryptjs
+  - dotenv
+  - winston
+  - express-rate-limit
+  - jest (for testing)
+  - supertest (for testing)
+- Other services may not include Jest or Supertest unless you add them for testing purposes.
 
 ## License
-ISC
 
-   
-   
+ISC
