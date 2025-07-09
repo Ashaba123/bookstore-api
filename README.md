@@ -2,162 +2,126 @@
 
 ## Overview
 
-The Bookstore API is a Node.js-based RESTful API for managing a bookstore's users, books, orders, and reviews. It uses Express.js for routing, PostgreSQL for data storage, and includes features like user authentication with JWT, password hashing with bcrypt, rate limiting, and logging with Winston. The API is tested using Jest and Supertest.
+Bookstore API is a microservices-based Node.js project for managing users, books, orders, and reviews in a bookstore. Each service is independent, with its own code, dependencies, and Dockerfile. The project uses Docker Compose to run all services together, including PostgreSQL, Redis, and RabbitMQ.
 
 ## Features
 
 - **User Management**: Register and login users with secure password hashing.
-- **Book Management**: CRUD operations for books (create, read, update, delete).
-- **Order Management**: Create and retrieve orders for authenticated users.
+- **Book Management**: CRUD operations for books (create, read, update, delete) with Redis caching.
+- **Order Management**: Create and retrieve orders for authenticated users. Integrates with RabbitMQ for messaging and includes retry logic for RabbitMQ startup.
 - **Review System**: Add and retrieve reviews for books.
 - **Security**: JWT-based authentication, rate limiting, and secure password storage.
-- **Logging**: Comprehensive logging with Winston for debugging and monitoring.
-- **Testing**: Automated tests with Jest and Supertest to ensure reliability.
-- **Deployment**:Render.
+- **Logging**: Winston logging for debugging and monitoring (users-service).
+- **Testing**: Jest and Supertest for automated tests (users-service).
 
 ## Prerequisites
 
-- **Node.js**: Version 14.18.0 or higher.
-- **PostgreSQL**: A running PostgreSQL database.
-- **npm**: Package manager for installing dependencies.
+- **Docker** and **Docker Compose** (recommended way to run the project)
+- (For development only) Node.js 14.18.0+ and npm if you want to run a service outside Docker
 
-## Installation
+## Project Structure
 
-1. **Clone the Repository**:
+``
+bookstore-api/
+  books-service/
+  orders-service/
+  reviews-service/
+  users-service/
+  docker-compose.yml
+  README.md
+
+``
+
+- Each `*-service` folder is a standalone Node.js microservice with its own `package.json` and `Dockerfile`.
+- `docker-compose.yml` orchestrates all services and dependencies.
+
+## Installation & Setup
+
+1. **Clone the Repository**
 
    ```bash
    git clone <repository-url>
    cd bookstore-api
    ```
 
-2. **Install Dependencies**:
-
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables**:
-
-   Create a `.env` file in the root directory with the following variables:
+2. **Create a .env file in the root directory**
 
    ```env
    DB_USER=your_db_user
    DB_PASSWORD=your_db_password
-   DB_HOST=localhost
-   DB_PORT=5432
    DB_NAME=your_db_name
    JWT_SECRET=your_jwt_secret
-   NODE_ENV=development
-   PORT=3000
+
    ```
 
-4. **Set Up the Database**:
+   - These variables are used by Docker Compose to configure all services.
 
-   Ensure your PostgreSQL database is running and has the following tables:
+3. **Run All Services with Docker Compose**
 
-   ```sql
+   ```bash
+   docker-compose up --build
 
-   CREATE TABLE users (
-     id SERIAL PRIMARY KEY,
-     username VARCHAR(255) UNIQUE NOT NULL,
-     password VARCHAR(255) NOT NULL
-   );
-   CREATE TABLE books (
-     id SERIAL PRIMARY KEY,
-     title VARCHAR(255) NOT NULL,
-     author VARCHAR(255) NOT NULL,
-     price NUMERIC(10,2) NOT NULL
-   );
-   CREATE TABLE orders (
-     id SERIAL PRIMARY KEY,
-     user_id INTEGER REFERENCES users(id),
-     book_id INTEGER REFERENCES books(id),
-     quantity INTEGER NOT NULL
-   );
-   CREATE TABLE reviews (
-     id SERIAL PRIMARY KEY,
-     user_id INTEGER REFERENCES users(id),
-     book_id INTEGER REFERENCES books(id),
-     rating INTEGER NOT NULL,
-     comment TEXT
-   );
    ```
 
-## Running the API
+   - This will build and start all microservices, plus PostgreSQL, Redis, and RabbitMQ.
+   - The Orders Service will retry connecting to RabbitMQ until it is ready.
 
-Start the server with:
+4. **Access the APIs**
+   - Users Service:      [http://localhost:3000](http://localhost:3000)
+   - Books Service:      [http://localhost:3001](http://localhost:3001)
+   - Orders Service:     [http://localhost:3002](http://localhost:3002)
+   - Reviews Service:    [http://localhost:300]
+   - RabbitMQ UI:        [http://localhost:15672] (user: guest, pass: guest)
 
-```bash
+## API Endpoints (per service)
 
-npm start
+### users-service
 
-```
+- `POST /signup` — Register a new user
+- `POST /login` — Login and receive a JWT
+- `GET /` — Welcome message
 
-The API will run on `http://localhost:3000` by default.
+### books-service
 
-## API Endpoints
+- `GET /books` — List all books
+- `GET /books/:id` — Get a book by ID
+- `POST /books` — Create a new book
+- (Add PUT/DELETE for full CRUD as needed)
 
-### Authentication
+### orders-service
 
-- `POST /signup` — Register a new user. `{ username, password }`
-- `POST /login` — Login and receive a JWT. `{ username, password }`
+- `POST /orders` — Create an order (Requires JWT)
+- `GET /orders` — List orders for authenticated user (Requires JWT)
 
-### Books
+### reviews-service
 
-- `GET /books` — List all books.
-- `GET /books/:id` — Get a book by ID.
-- `POST /books` — Create a new book. (Requires JWT)
-- `PUT /books/:id` — Update a book. (Requires JWT)
-- `DELETE /books/:id` — Delete a book. (Requires JWT)
-
-### Orders
-
-- `POST /orders` — Create an order. (Requires JWT)
-- `GET /orders` — List orders for authenticated user. (Requires JWT)
-
-### Reviews
-
-- `POST /reviews` — Add a review for a book. (Requires JWT)
-- `GET /reviews/:book_id` — List reviews for a book.
-
-### Misc
-
-- `GET /` — Welcome message.
+- `POST /reviews` — Add a review for a book (Requires JWT)
+- `GET /reviews/:book_id` — List reviews for a book
 
 ## Security & Middleware
 
-- **JWT Authentication**: Protects sensitive endpoints.
-- **Rate Limiting**: Prevents abuse (100 requests per 15 minutes).
-- **Password Hashing**: Uses bcryptjs for secure password storage.
-- **Logging**: Uses Winston for request and error logging.
+- **JWT Authentication**: Protects sensitive endpoints
+- **Rate Limiting**: Prevents abuse (100 requests per 15 minutes)
+- **Password Hashing**: Uses bcryptjs for secure password storage
+- **Logging**: Winston for request and error logging (users-service)
 
 ## Testing
 
-- The `users-service` includes automated tests using Jest and Supertest. To run tests for the users-service:
+- The `users-service` includes automated tests using Jest and Supertest:
 
   ```bash
   cd users-service
   npm test
   ```
 
-- Tests are located in the `users-service/tests/` directory and cover authentication and user management endpoints.
 - Other services can be similarly configured for testing by adding Jest and Supertest to their dependencies.
 
 ## Dependencies
 
-Each service manages its own dependencies in its respective `package.json` file. For example:
+Each service manages its own dependencies in its own `package.json` file. Key dependencies include:
 
-- `users-service`:
-  - express
-  - pg
-  - jsonwebtoken
-  - bcryptjs
-  - dotenv
-  - winston
-  - express-rate-limit
-  - jest (for testing)
-  - supertest (for testing)
-- Other services may not include Jest or Supertest unless you add them for testing purposes.
+- express, pg, jsonwebtoken, bcryptjs, dotenv, winston, express-rate-limit, amqplib (orders-service), redis
+- Jest and Supertest (for testing, users-service)
 
 ## License
 
